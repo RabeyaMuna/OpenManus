@@ -1,13 +1,22 @@
-import sys
 import asyncio
 import json
 import os
-print(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+import sys
+
+
+print(
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    )
+)
+sys.path.append(
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    )
+)
 
 from typing import Any, Hashable
 
-import pandas as pd
 from pydantic import Field, model_validator
 
 from app.config import config
@@ -41,8 +50,8 @@ Contains chart insights data in format:
                 "description": "Visualization output format selection",
                 "default": "html",
                 "enum": [
-                    "png",    # Static image format
-                    "html"    # Interactive web format (recommended)
+                    "png",  # Static image format
+                    "html",  # Interactive web format (recommended)
                 ],
             },
         },
@@ -59,9 +68,9 @@ Contains chart insights data in format:
 
     def load_chart_with_css(self, chart_path):
         # 读取 HTML 文件
-        with open(chart_path, 'r', encoding='utf-8') as f:
+        with open(chart_path, "r", encoding="utf-8") as f:
             html_content = f.read()
-        html_content = html_content.replace('`', "'")
+        html_content = html_content.replace("`", "'")
 
         # 在 <head> 里插入 CSS
         css = """
@@ -85,7 +94,7 @@ Contains chart insights data in format:
         else:
             html_content = css + html_content
 
-        with open(chart_path, 'w', encoding='utf-8') as f:
+        with open(chart_path, "w", encoding="utf-8") as f:
             f.write(html_content)
 
     def get_file_path(
@@ -147,14 +156,16 @@ Contains chart insights data in format:
                 success_list.append(chart_path)
                 self.load_chart_with_css(chart_path)
 
+        joined_success = ",".join(success_list) if len(success_list) > 0 else ""
         success_template = (
-            f"# Charts Update with Insights\n{','.join(success_list)}"
+            f"# Charts Update with Insights\n{joined_success}"
             if len(success_list) > 0
             else ""
         )
         if len(error_list) > 0:
+            joined_errors = "\n".join(error_list)
             return {
-                "observation": f"# Error in chart insights:{'\n'.join(error_list)}\n{success_template}",
+                "observation": f"# Error in chart insights:{joined_errors}\n{success_template}",
                 "success": False,
             }
         else:
@@ -225,4 +236,3 @@ Contains chart insights data in format:
                 return {"error": f"Node.js Error: {stderr_str}"}
         except Exception as e:
             return {"error": f"Subprocess Error: {str(e)}"}
-
